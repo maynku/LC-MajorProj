@@ -4,19 +4,19 @@ const {Schema}=mongoose;
 const UserSchema=new Schema({
     firstName:{
         type:String,
-        require:true,
+        required:true,
         minLength:3,
         maxLength:20,
     },
     lastName:{
         type:String,
-        require:true,
+        required:true,
         minLength:3,
         maxLength:20,
     },
     emailId:{
         type:String,
-        require:true,
+        required:true,
         unique:true,
         trim:true, //removes extra spaxes 
         lowercase:true, // accept only  char to lower case 
@@ -25,7 +25,7 @@ const UserSchema=new Schema({
     },
     age:{
         type:Number,
-        require:true,
+        required:true,
         min:10,
         max:80,
     },
@@ -39,6 +39,10 @@ const UserSchema=new Schema({
     photo:{
         type:String,
         default:"this is default photo"
+    },
+    password:{
+        type:String,
+        required:true,
     }
 
 },{ timestamps:true})
