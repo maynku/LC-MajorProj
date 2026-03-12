@@ -30,7 +30,7 @@ const register =async(req,res)=>{
         }
         
         //create and send token 
-        const token=jwt.sign({_id:user._id, emailId:emailId},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
+        const token=jwt.sign({_id:user._id, emailId:emailId,role: user.role},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
         res.cookie("token",token,{maxage:60*60*1000}) //mili 
         //sec second m hota hai 
 
