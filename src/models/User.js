@@ -30,6 +30,7 @@ const UserSchema=new Schema({
         max:80,
     },
     role:{
+        type:String,
         enum:['user','admin'],
         default:'user',
     },
