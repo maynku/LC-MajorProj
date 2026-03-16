@@ -1,5 +1,5 @@
-//const path = require('path');
-//require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 
 const User=require('../models/User');
@@ -78,12 +78,20 @@ const login=async(req,res)=>{
     }
 }
 
-const logout=(req,res)=>{
+const logout=async(req,res)=>{
     try {
-        res.clearCookie("token");
+        //validate the token
+        //token add kr dunga redis m blockList ke naam se
+        //cookien ko clear kr dunga
+        const {token} = req.cookies;
+        const payload = jwt.decode(token);
+        await redisClient.set(`token:${token}`, 'blocked');
+        await redisClient.expire(`token:${token}`, payload.exp); // Set expiration time for the blocked token (e.g., 
+        res.cookie("token",null,{expire :new Date(Date.now())})
         res.status(200).json({ message: "User logged out successfully" });
+
     } catch (error) {
-        res.status(400).json({ message: "Error "+err });     
+        res.status(503).json({ message: "Error "+err });     
     }
 }
 

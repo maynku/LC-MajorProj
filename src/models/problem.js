@@ -68,8 +68,21 @@ const ProblemSchema=new Schema({
         type:Schema.Types.ObjectId,
         ref:'user',
         required:true,
-    }
-},{timestamps:true})
+    },
+    referenceSolution:[
+        {
+            language:{
+                type:String,
+                required:true,
+            },
+            intialcode:{
+                type:String,
+                required:true,
+            }
+        }
+
+    ]
+});
 
 const Problem=mongoose.model("problem",ProblemSchema);
 module.exports=Problem;
