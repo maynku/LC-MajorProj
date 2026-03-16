@@ -6,6 +6,7 @@ const User=require('../models/User');
 const validator=require('../utils/validator');
 const becrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
+const redisClient = require('../config/redis');
 
 
 const register =async(req,res)=>{
@@ -61,7 +62,7 @@ const login=async(req,res)=>{
         if(!user){
             throw new Error("user not found");
         }
-        const match= becrypt.compare(req.body.password,user.password);// old +current password
+        const match= await becrypt.compare(req.body.password,user.password);// old +current password
         if(!match){
             throw new Error("invalid password");
         }
@@ -91,7 +92,7 @@ const logout=async(req,res)=>{
         res.status(200).json({ message: "User logged out successfully" });
 
     } catch (error) {
-        res.status(503).json({ message: "Error "+err });     
+        res.status(503).json({ message: "Error "+error });     
     }
 }
 
@@ -100,7 +101,7 @@ const getProfile=async(req,res)=>{
         const user=await User.findById(req.user._id);
         res.status(200).json({ message: "User profile fetched successfully",data:user });
     } catch (error) {
-        res.status(400).json({ message: "Error "+err });     
+        res.status(400).json({ message: "Error "+error });     
     }
 }
 
