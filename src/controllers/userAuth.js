@@ -20,6 +20,7 @@ const register =async(req,res)=>{
         //hash the password 
         req.body.password=await becrypt.hash(password,10);
         const user=await User.create(req.body)
+        req.body.role="user"; //always register as user
 
         console.log('Creating JWT token...');
         console.log('Token payload:', {_id:user._id, emailId:emailId});
@@ -31,7 +32,7 @@ const register =async(req,res)=>{
         }
         
         //create and send token 
-        const token=jwt.sign({_id:user._id, emailId:emailId,role: user.role},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
+        const token=jwt.sign({_id:user._id, emailId:emailId,role: 'user'},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
         res.cookie("token",token,{maxage:60*60*1000}) //mili 
         //sec second m hota hai 
 
@@ -68,7 +69,7 @@ const login=async(req,res)=>{
         }
          //create and send token 
 
-        const token=jwt.sign({_id:user._id, emailId:emailId},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
+        const token=jwt.sign({_id:user._id, emailId:emailId, role:user.role},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
         res.cookie("token",token,{maxage:60*60*1000}) //mili 
         //sec second m hota hai 
         
@@ -105,4 +106,40 @@ const getProfile=async(req,res)=>{
     }
 }
 
-module.exports={register,login,logout,getProfile};
+const adminRegister = async (req, res) => {
+    try {
+        console.log('Admin Register Function Called!');
+        //validate the data 
+        validator(req.body);
+        // if(req.result.role!='admin'){
+        //     throw new Error("Only admin can register another admin");
+        // }
+        // Your registration logic here
+        const {firstName,emailId,password}=req.body;   
+
+        //hash the password 
+        req.body.password=await becrypt.hash(password,10);
+        const user=await User.create(req.body)
+        req.body.role="admin"; //always register as admin
+
+        console.log('Creating JWT token...');
+        console.log('Token payload:', {_id:user._id, emailId:emailId});
+        console.log('JWT_SECRET_KEY for JWT:', process.env.JWT_SECRET_KEY);
+        console.log('Type of JWT_SECRET_KEY:', typeof process.env.JWT_SECRET_KEY);
+        
+        if(!process.env.JWT_SECRET_KEY){
+            throw new Error('JWT_SECRET_KEY is undefined at token creation');
+        }
+        
+        //create and send token 
+        const token=jwt.sign({_id:user._id, emailId:emailId,role: 'admin'},process.env.JWT_SECRET_KEY,{expiresIn:60*60})
+        res.cookie("token",token,{maxage:60*60*1000}) //mili 
+        //sec second m hota hai 
+
+        res.status(201).json({ message: "User registered successfully" });
+    }catch (error) {
+        res.status(400).json({ message: "Error "+error });     
+    }
+}
+
+module.exports={adminRegister,register,login,logout,getProfile};
