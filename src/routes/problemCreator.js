@@ -14,7 +14,7 @@ ProblemRouter.delete("/delete/:id",adminMiddleware,deleteProblem);
 
 
 //fetch
-ProblemRouter.get("/",fetchallProblem);
-ProblemRouter.get("/:id",fetchProblembyid);
-ProblemRouter.get("/user",fetchProblemByuser);
+ProblemRouter.get("/",getallProblem);
+ProblemRouter.get("/:id",getProblembyid);
+ProblemRouter.get("/user",solvedAllProblemByuser);
 
