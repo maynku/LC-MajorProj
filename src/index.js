@@ -11,9 +11,12 @@ app.use(express.json()); //json to java script object conversion
 app.use(cookieParser()); //string k form m cokkie aayegi usko parse krk object ki form m kr dega readibility bdhane k liye 
 
 const authRouter=require('./routes/userAuth');
+const problemRouter=require('./routes/problemCreator');
+
+
 
 app.use('/user',authRouter);
-
+app.use('/problem',problemRouter);
 
 console.log("expess using port number"+process.env.PORT); // Should print 3000
 
