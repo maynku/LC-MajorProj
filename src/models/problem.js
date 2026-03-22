@@ -36,7 +36,7 @@ const ProblemSchema=new Schema({
             }
         }
     ],
-    invisibltestCases:[
+    invisibletestCases:[
         {
             input:{
                 type:String,
@@ -57,7 +57,7 @@ const ProblemSchema=new Schema({
                 type:String,
                 required:true,
             },
-            intialcode:{
+            initialcode:{
                 type:String,
                 required:true,
             }
@@ -75,7 +75,7 @@ const ProblemSchema=new Schema({
                 type:String,
                 required:true,
             },
-            intialcode:{
+            initialcode:{
                 type:String,
                 required:true,
             }

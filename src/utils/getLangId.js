@@ -1,6 +1,6 @@
-const axios=require('axios');
+const axios = require("axios");
 
-const getLanguageById=(lang)=>{
+const getLanguageById = (lang) => {
     const languages = {
         "c++": 54,
         "java": 62,
@@ -8,84 +8,81 @@ const getLanguageById=(lang)=>{
         "javascript": 63,
         "ruby": 72,
     }
-    return languages[lang] || null; // Return null if language not found
+    return languages[lang]; // Return null if language not found
 }
 
-const submitBatch=async(submissions)=>{
-    // Implement the logic to submit the batch of code submissions to the Judge0 API
-    // You can use axios or any HTTP client to make the API requests 
-    console.log("Submitting batch to Judge0 API...");
-    const axios = require("axios");
+const submitBatch = async (submissions) => {
+    console.log("Submitting batch to Hosted Judge0 API...");
 
     const options = {
         method: "POST",
-        url: "http://localhost:2358/submissions/batch",
+        url: "https://ce.judge0.com/submissions/batch", // <-- hosted API
         params: {
-        base64_encoded: "false",
-    },
-    headers: {
-        "Content-Type": "application/json",
-    },
-    data: {
-        submissions
+            base64_encoded: "false",
         },
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: {
+            submissions
+        },
+        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }) // ignore SSL errors on Windows
     };
 
     async function sendBatch() {
-    try {
-        const res = await axios.request(options);
-        console.log(res.data);
-        return res.data;
-        
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-        throw new Error("Failed to submit batch to Judge0 API");
-    }
-}
-   return await sendBatch();
-    //why do we axios
-    //ftech =>jsobnject but it auto trnaslate to json
-    //promise result req not fullfill code error auto
+        try {
+            const res = await axios.request(options);
+            console.log(res.data);
+            return res.data;
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+            throw new Error("Failed to submit batch to Judge0 API");
+        }
+    }  
+
+    console.log("calling sendBatch...");
+    return await sendBatch();
 }
 
 const waiting = (timer) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(1);
-    }, timer);
-  });
+    return new Promise((resolve) => setTimeout(resolve, timer));
 };
 
 const submitToken = async (resultToken) => {
-  const options = {
-    method: "GET",
-    url: "http://localhost:2358/submissions/batch",
-    params: {
-      tokens: Array.isArray(resultToken)
-        ? resultToken.join(",")
-        : resultToken,
-      base64_encoded: "false",
-      fields: "*",
-    },
-  };
+    const options = {
+        method: "GET",
+        url: "https://ce.judge0.com/submissions/batch", // <-- hosted API
+        params: {
+            tokens: Array.isArray(resultToken)
+                ? resultToken.join(",")
+                : resultToken,
+            base64_encoded: "false",
+            fields: "*",
+        },
+        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }) // ignore SSL errors
+    };
 
-  async function fetchData(){
-    try {
-    const response = await axios.request(options);
-    return response.data;
-  } catch (error) {
-    console.error(error.response?.data || error.message);
-  }
-  }
-  
-  while (true) {
-    const result=await fetchData();
-    const isResultObtained=result.submissions.every((submission) => submission.status.id > 3);
-  if(isResultObtained){
-    return result.submissions;
-  }
-    await waiting(1000);
-  }
+    async function fetchData() {
+        try {
+            const response = await axios.request(options);
+            return response.data;
+        } catch (error) {
+            console.error(error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    while (true) {
+        const result = await fetchData();
+        // Judge0: 1 = in queue, 2 = processing, 3+ = terminal (Accepted=3, WA=4, ...)
+        // Was `> 3` which never becomes true when all tests are Accepted — infinite hang.
+        const sid = (s) => (s.status && s.status.id) ?? s.status_id;
+        const isResultObtained = result.submissions.every((submission) => sid(submission) > 2);
+        if (isResultObtained) {
+            return result.submissions;
+        }
+        await waiting(1000);
+    }
 };
 
-module.exports={getLanguageById,submitBatch,submitToken};
+module.exports = { getLanguageById, submitBatch, submitToken };
