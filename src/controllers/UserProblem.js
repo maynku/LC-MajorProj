@@ -201,16 +201,15 @@ const getProblembyid=async(req,res)=>{
         message:"Problem id is required"
       });
     }
-    const existingProblem= await Problem.findById(id);
+    const existingProblem= await Problem.findById(id).select('_id title description difficulty tags visibletestCases  startcode referenceSolution');
+    //-hiddentestcases
     if(!existingProblem){
       return res.status(404).json({
         message:"Problem not found"
       });
     }
 
-    return res.status(200).send(existingProblem).json({
-      message:"Problem fetched successfully"  
-    });
+    return res.status(200).send(existingProblem);
 
   }catch(error){
     return res.status(500).json({
@@ -221,7 +220,7 @@ const getProblembyid=async(req,res)=>{
 
 const getallProblem=async(req,res)=>{
   try{
-    const allProblem= await Problem.find({});
+    const allProblem= await Problem.find({}).select('_id title  difficulty tags');
     if(allProblem.length===0){
       return res.status(404).json({
         message:"No problem found"
@@ -239,7 +238,7 @@ const getallProblem=async(req,res)=>{
 }
 
 const solvedAllProblemByuser=async(req,res)=>{
-
+    
 }
 
 
