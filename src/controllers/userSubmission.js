@@ -82,5 +82,45 @@ const submitCode = async (req, res) => {
   }
 };
 
+const runCode = async (req, res) => {
+  try {
+    const userId = req.result._id;
+    const problemId = req.params.id;
+    const { code, language } = req.body;
 
-module.exports = submitCode;
+    const actlanguage = getLanguageById(language);
+
+    if (!code || !actlanguage || !problemId || !userId) {
+      return res.status(400).json({ message: "Code and language are required" });
+    }
+
+    const problem = await Problem.findById(problemId);
+    if (!problem) {
+      return res.status(404).json({ message: "Problem not found" });
+    }
+
+
+    let submissions = problem.visibletestCases.map(({ input, output }) => ({
+      source_code: code,
+      language_id: actlanguage,
+      stdin: input,
+      expected_output: output,
+    }));
+
+    const submitResult = await submitBatch(submissions);
+
+    const tokens = submitResult.map((t) => t.token);
+    const results = await submitToken(tokens);
+
+
+
+
+    return res.status(200).send(results);
+
+  } catch (error) {
+    return res.status(500).json({ message: "Error submitting code " + error.message });
+  }
+};
+
+
+module.exports ={ submitCode, runCode };
